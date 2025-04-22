@@ -20,7 +20,7 @@ classdef AudioSampleCollector
         % METADATA
         classifiers
         features = [];
-        labels = [];
+        labels = string([]);
 
         % AUDIO SETUP
         fs = 16000; % sample rate
@@ -34,16 +34,16 @@ classdef AudioSampleCollector
             %   Loads features and labels from existing .mat file
             obj.classifiers = classifiers;
             obj.recorder = audiorecorder(obj.fs, obj.bps, 1);
-            if(exist("mfcc_features_and_labels.mat", "file"))
-                load('mfcc_features_and_labels.mat', 'features', 'labels');
+            if(exist("data/mfcc_features_and_labels.mat", "file") == 2)
+                load('data/mfcc_features_and_labels.mat', 'features', 'labels');
                 obj.features = features;
                 obj.labels = labels;
             end
         end
         
         function startSampling(obj)
-            %STARTSAMPLING Summary of this method goes here
-            %   Detailed explanation goes here
+            %STARTSAMPLING Collects audio samples for classifiers
+            %   IMPORTANT: MUST QUIT PROPERLY FOR DATA TO SAVE CORRECTLY
             disp("Starting audio sampling for following classifiers: ");
             disp(obj.classifiers);
             % recording loop
@@ -61,7 +61,7 @@ classdef AudioSampleCollector
                 
 %                  disp("Press enter to record a sample, 's' to choose a new classifier, or 'q' to quit recording")
                 while true
-                    cmd = input("Press enter to record a sample, 's' to choose a new classifier, or 'q' to quit recording", "s");
+                    cmd = input("Press enter to record a sample, 's' to choose a new classifier, or 'q' to quit recording: ", "s");
                     switch cmd
                         case ""
                             % record audio
@@ -91,21 +91,26 @@ classdef AudioSampleCollector
                             % N being the frames per audio sample. For
                             % classification training, we'll average the
                             % coeffs across frames to get a 1x13 vector.
-                            coeffs = mfcc(normalized_audio, obj.fs, 'NumCoeffs', 13);
+                            % LogEnergy is ignored (pertains to audio
+                            % volume)
+                            coeffs = mfcc(normalized_audio, obj.fs, 'NumCoeffs', 13, "LogEnergy","ignore");
                             sample_feature = mean(coeffs, 1);
                             
                            
                             % store label and feature
                             obj.features = [obj.features; sample_feature];
-                            obj.labels = [obj.labels; sample_classifier];
+                            obj.labels(end+1) = sample_classifier;
 
                         case "s"
-                            disp("select");
+                            obj.save();
+                            break
+
                         case "q"
                             disp("Saving Data and Quitting...");
                             quit = true;
                             obj.save();
                             break
+
                         otherwise
                             disp("Invalid command");
                     end
@@ -115,10 +120,14 @@ classdef AudioSampleCollector
         end
 
         function save(obj)
+            % get path to data folder in project
+            proj = currentProject;
+            save_path = fullfile(proj.RootFolder, 'data', 'mfcc_features_and_labels.mat');
+
             features = obj.features;
             labels = obj.labels;
-            save('mfcc_features_and_labels.mat', 'features', 'labels');
-            disp("Features and Labels save in 'mfcc_features_and_labels.mat'")
+            save(save_path, 'features', 'labels');
+            disp("Features and Labels saved in 'data/mfcc_features_and_labels.mat'")
         end
     end
 end
