@@ -122,7 +122,7 @@ classdef AudioSampleCollector
         function save(obj)
             % get path to data folder in project
             proj = currentProject;
-            save_path = fullfile(proj.RootFolder, 'data', 'mfcc_features_and_labels.mat');
+            save_path = fullfile(proj.RootFolder, "data", "mfcc_features_and_labels.mat");
 
             features = obj.features;
             labels = obj.labels;
