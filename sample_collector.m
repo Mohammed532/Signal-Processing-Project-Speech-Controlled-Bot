@@ -1,5 +1,5 @@
 % sample_collector.m
-% collects audio samples
+% script for collecting audio samples
 
 classifiers = ["left", "right", "forward", "backward", "180", "dance"];
 

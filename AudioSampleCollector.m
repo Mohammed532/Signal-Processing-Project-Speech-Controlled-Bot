@@ -1,6 +1,6 @@
 classdef AudioSampleCollector
     %AUDIOSAMPLECOLLECTOR Collects audio samples and stores MFCC features
-    %and labels
+    % and labels
     %
     %
     %   REQUIREMENTS
